@@ -13,20 +13,30 @@
     <body>
 
         <header>
-            <a href="#">View High Scores</a>
-            <p>Time: 60</p>
+            <button id="view-high-scores">View High Scores</button>
+            <p>Time: <span id="timer">60</span></p>
         </header>
 
         <main>
             <section id="quiz-container">
                 <h1>Coding Quiz Challenge</h1>
+                <p id="instructions">Try to answer the following code-related questions within the time limit. Incorrect answers 
+                    will incur a 10 second penalty!</p>
                 <div id="choices-container">
-                    <button>This is one choice</button>
-                    <button>This is yet another choice</button>
-                    <button>This one is a choice, too</button>
-                    <button>Here is another choice</button>
+                    <button class="choice-button"></button>
+                    <button class="choice-button"></button>
+                    <button class="choice-button"></button>
+                    <button class="choice-button"></button>
                 </div>
             </section>
+            <div id="answer-status-container">
+                <p id="answer-status"></p>
+            </div>
+            <div id="initials-container">
+                <label for="initials">Enter your initials:</label>
+                <input id="initials">
+            </div>
+            <button id="start-button">Start Quiz</button>
         </main>
 
         <script src='scripts/main.js'></script>
