@@ -1,7 +1,7 @@
 body {
     font-family: monospace;
     color: black;
-    background-color: rgb(219, 253, 236);
+    background-color: #DBFDEC;
 }
 
 header {
@@ -65,6 +65,10 @@ button:hover {
 
 #answer-status-container {
     display: flex;
+}
+
+#answer-status {
+    font-size: 1.2em;
 }
 
 #initials-container {

@@ -72,25 +72,44 @@ startButton.addEventListener("click", startQuiz);
 
 //Add event listeners to all choice buttons
 for (let i = 0; i < 4; i++) {
-    choiceButtons[i].addEventListener("click", function(event) {
-        //Check if the button clicked is the correct answer, and if not, deduct points
-        if (event.target.textContent === questions[currentQuestion].correctAnswer) {
-            answerStatus.textContent = "Correct!";
-            setTimeout(function() {
-                answerStatus.textContent = "";
-            }, 1000);
-        } else {
-            timeRemaining -= 10;
-            answerStatus.textContent = "Wrong!";
-            setTimeout(function() {
-                answerStatus.textContent = "";
-            }, 1000);        }
-        currentQuestion++;
-        takeQuiz();
-    });
+    choiceButtons[i].addEventListener("click", allowClicks);
 }
 
+function allowClicks(event) {
+    event.preventDefault();
 
+    //Check if the button clicked is the correct answer, and if not, deduct points
+    if (event.target.textContent === questions[currentQuestion].correctAnswer) {
+        answerStatus.textContent = "Correct!";
+        event.target.setAttribute("style", "background-color: #59DD9B;");
+        setTimeout(function() {
+            answerStatus.textContent = "";
+            event.target.setAttribute("style", "background-color: #6E7F76;")
+        }, 1000);
+    } else {
+        timeRemaining -= 10;
+        answerStatus.textContent = "Wrong!";
+        event.target.setAttribute("style", "background-color: #FFAE8D;");
+        setTimeout(function() {
+            answerStatus.textContent = "";
+            event.target.setAttribute("style", "background-color: #6E7F76;")
+        }, 1000);        
+    }
+    //Temporarily remove event listeners for choice buttons to avoid users clicking multiple answers for the same question
+    for (let i = 0; i < 4; i++) {
+        choiceButtons[i].removeEventListener("click", allowClicks);
+    }
+    //Return event listeners
+    setTimeout(function() {
+        for (let i = 0; i < 4; i++) {
+            choiceButtons[i].addEventListener("click", allowClicks);
+        }
+    }, 1000);
+    currentQuestion++;
+    setTimeout(takeQuiz, 1000);
+}
+
+//When start button clicked, set up displays for quiz questions and start the timer
 function startQuiz() {
     startButton.style.display = "none";
     instructionsEl.style.display = "none";
@@ -128,7 +147,7 @@ function takeQuiz() {
             questions[currentQuestion].wrongThree
         ];
     
-        //Randomly populate choice buttons with answers for increased retake value
+        //Randomly populate choice buttons with answer choices for increased retake value
         let  populated = [];
     
         for (let i = 0; i < 4; i++) {
@@ -137,10 +156,10 @@ function takeQuiz() {
             choiceButtons[i].textContent = randomChoice;
             populated.push(randomChoice);
             //Remove previously populated choice from answerChoices array
-            console.log(answerChoices);
             let chosenIndex = answerChoices.indexOf(randomChoice);
             answerChoices.splice(chosenIndex, 1);
         }
+
     } else {
         //If all questions are answered, end the quiz
         endQuiz();
@@ -156,17 +175,13 @@ function endQuiz () {
     initialsSubmitButton.textContent = "Submit";
     // initialsSubmitButton.setAttribute("style", "margin: 15px auto;")
     initialsEl.appendChild(initialsSubmitButton);
+    initialsSubmitButton.addEventListener("click", submitScore);
     
     let score = parseInt(timerEl.textContent);
     instructionsEl.textContent = `Your final score was ${score}`;
     headerEl.textContent = "Game over";
 }
 
+function submitScore() {
 
-
-
-/* TODO:
-
-
-
-*/
+}
