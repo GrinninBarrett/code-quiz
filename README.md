@@ -6,7 +6,7 @@ I decided to use an array of objects for the quiz questions, as this was easier 
 
 
 ## Screenshot of completed application:
-![Screenshot of Tucker's completed Password Generator](images/finished-password-generator.png "Tucker's completed Password Generator")
+![Screenshot of Tucker's completed Code Quiz](images/finished-password-generator.png "Tucker's completed Code Quiz")
 
 ## Link to deployed application:
-[Tucker Barrett's Horiseon](http://grinninbarrett.github.io/password-generator "Tucker's deployed password generator application")
+[Tucker Barrett's Code Quiz](http://grinninbarrett.github.io/password-generator "Tucker's deployed Code Quiz application")
