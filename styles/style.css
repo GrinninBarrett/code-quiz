@@ -59,6 +59,14 @@ button:hover {
     height: 250px;
 }
 
+#high-scores-list {
+    display: none;
+}
+
+li:nth-child(odd) {
+    background-color: #c1e2d2;
+}
+
 #start-button {
     margin-top: 25px;
 }

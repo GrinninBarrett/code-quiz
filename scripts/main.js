@@ -1,3 +1,4 @@
+//Initialize all element and other global variables
 let viewScoresButton = document.querySelector("#view-high-scores");
 let startButton = document.querySelector("#start-button");
 let timerEl = document.querySelector("#timer");
@@ -9,18 +10,24 @@ let instructionsEl = document.querySelector("#instructions");
 let choicesEl = document.querySelector("#choices-container");
 let choiceButtons = document.querySelectorAll(".choice-button");
 
+let highScoresList = document.querySelector("#high-scores-list");
+
 let statusEl = document.querySelector("#answer-status-container");
 let answerStatus = document.querySelector("#answer-status");
 
 let initialsEl = document.querySelector("#initials-container");
 let initialsInput = document.querySelector("#initials");
 let initialsSubmitButton = document.createElement("button");
+initialsSubmitButton.textContent = "Submit";
+initialsEl.appendChild(initialsSubmitButton);
 
 let scoresPageButtonsContainer = document.createElement("div");
 let backButton = document.createElement("button");
 let resetHighScoresButton = document.createElement("button");
 
-let highScoresList = document.createElement("ol");
+let onHighScoresPage = false;
+
+let gameInProgress = false;
 
 let currentQuestion = 0;
 
@@ -29,8 +36,8 @@ let timerInterval;
 
 let score;
 let numScores = 0;
-let numNames = 0;
 let allScores = [];
+let nextScore;
 
 
 //Create array of objects of all questions, including their answers
@@ -80,7 +87,11 @@ let questions = [
 
 
 //Add event listener to the "view high scores" button
-viewScoresButton.addEventListener("click", viewScores);
+viewScoresButton.addEventListener("click", function() {
+    if (!onHighScoresPage && !gameInProgress) {
+        viewScores();
+    }
+});
 
 //Add event listener to start button
 startButton.addEventListener("click", startQuiz);
@@ -91,7 +102,7 @@ for (let i = 0; i < 4; i++) {
 }
 
 //Add event listener to submit button
-initialsSubmitButton.addEventListener("click", viewScores);
+initialsSubmitButton.addEventListener("click", submitScore);
 
 function allowClicks(event) {
     event.preventDefault();
@@ -129,15 +140,18 @@ function allowClicks(event) {
 
 //Make function for "home" screen, to be returned to by "back" button
 function homeScreen() {
+    onHighScoresPage = false;
     headerEl.textContent =  "Coding Quiz Challenge";
     instructionsEl.textContent = "Try to answer the following code-related questions within the time limit. Incorrect answers will incur a 10 second penalty!";
     startButton.style.display = "block";
     scoresPageButtonsContainer.style.display = "none";
+    highScoresList.style.display = "none";
     timerEl.textContent = timeRemaining;
 }
 
 //When start button clicked, set up displays for quiz questions and start the timer
 function startQuiz() {
+    gameInProgress = true;
     startButton.style.display = "none";
     instructionsEl.style.display = "none";
     choicesEl.style.display = "flex";
@@ -197,15 +211,12 @@ function takeQuiz() {
 }
 
 function endQuiz () {
+    gameInProgress = false;
     currentQuestion = 0;
     timeRemaining = 60;
     instructionsEl.style.display = "flex";
     choicesEl.style.display = "none";
     initialsEl.style.display = "flex";
-
-    initialsSubmitButton.textContent = "Submit";
-    initialsEl.appendChild(initialsSubmitButton);
-    initialsSubmitButton.addEventListener("click", submitScore);
     
     score = parseInt(timerEl.textContent);
 
@@ -216,14 +227,19 @@ function endQuiz () {
 function submitScore() {
     allScores[numScores] = {
         name: initialsInput.value.trim(),
-        score: score
+        score: score.toString()
     };
+    let newScore = allScores[numScores];
+    console.log(newScore);
     numScores++;
-    localStorage.setItem(`score${numScores}`, JSON.stringify(allScores[numScores - 1]));
-    viewScores;
+    localStorage.setItem(`score${numScores}`, JSON.stringify(newScore));
+    nextScore = document.createElement("li");
+    highScoresList.appendChild(nextScore);
+    viewScores();
 }
 
 function viewScores() {
+    onHighScoresPage = true;
     startButton.style.display = "none";
     initialsEl.style.display = "none";
     backButton.textContent = "Back";
@@ -240,19 +256,16 @@ function viewScores() {
     backButton.addEventListener("click", homeScreen);
     resetHighScoresButton.addEventListener("click", resetHighScores);
 
-
-    quizContainerEl.appendChild(highScoresList);
-    let nextScore = document.createElement("p");
-    highScoresList.appendChild(nextScore);
-
+    highScoresList.setAttribute("style", "display: flex; flex-direction: column;");
+    
     let scoreItem = JSON.parse(localStorage.getItem(`score${numScores}`));
-    console.log(scoreItem);
-    nextScore.textContent = `1. ${scoreItem}`;
+    nextScore.textContent = `${scoreItem.name} - ${scoreItem.score}`;
 }
 
 function resetHighScores() {
     allScores = [];
-    localStorage.setItem("scores", allScores);
+    localStorage.clear();
+    highScoresList.innerHTML = "";
 }
 
 homeScreen();
