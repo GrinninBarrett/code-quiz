@@ -220,8 +220,8 @@ function endQuiz () {
     
     score = parseInt(timerEl.textContent);
 
-    instructionsEl.textContent = `Your final score was ${score}`;
     headerEl.textContent = "Game over";
+    instructionsEl.textContent = `Your final score was ${score}`;
 }
 
 function submitScore() {
@@ -230,9 +230,15 @@ function submitScore() {
         score: score.toString()
     };
     let newScore = allScores[numScores];
-    console.log(newScore);
     numScores++;
+    
+    //Set local storage item with most recent score
     localStorage.setItem(`score${numScores}`, JSON.stringify(newScore));
+
+    //Sort all scores in descending order by score, for better display of high scores on high scores page
+    allScores.sort((a, b) => a.score < b.score ? 1 : -1);
+    console.log(allScores);
+
     nextScore = document.createElement("li");
     highScoresList.appendChild(nextScore);
     viewScores();
@@ -257,14 +263,22 @@ function viewScores() {
     resetHighScoresButton.addEventListener("click", resetHighScores);
 
     highScoresList.setAttribute("style", "display: flex; flex-direction: column;");
-    
-    let scoreItem = JSON.parse(localStorage.getItem(`score${numScores}`));
-    nextScore.textContent = `${scoreItem.name} - ${scoreItem.score}`;
+
+    //Set text content for each list item according to high score list
+    let allListItems = document.querySelectorAll("li");
+    for (let i = 0; i < allListItems.length; i++) {
+        allListItems[i].textContent = `${allScores[i].name} - ${allScores[i].score}`;
+    }
+
+    //Bold top score
+    allListItems[0].setAttribute("style", "font-weight: bold;");
 }
 
 function resetHighScores() {
     allScores = [];
     localStorage.clear();
+
+    //Remove all list item children from high scores list
     highScoresList.innerHTML = "";
 }
 
