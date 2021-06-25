@@ -81,3 +81,10 @@ button:hover {
 #initials {
     margin: 15px auto;
 }
+
+#high-scores-buttons {
+    display: flex;
+
+    width: 500px;
+
+}

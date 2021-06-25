@@ -1,6 +1,9 @@
 let viewScoresButton = document.querySelector("#view-high-scores");
 let startButton = document.querySelector("#start-button");
 let timerEl = document.querySelector("#timer");
+
+let mainContainer = document.querySelector("main");
+let quizContainerEl = document.querySelector("#quiz-container");
 let headerEl = document.querySelector("h1");
 let instructionsEl = document.querySelector("#instructions");
 let choicesEl = document.querySelector("#choices-container");
@@ -13,9 +16,21 @@ let initialsEl = document.querySelector("#initials-container");
 let initialsInput = document.querySelector("#initials");
 let initialsSubmitButton = document.createElement("button");
 
+let scoresPageButtonsContainer = document.createElement("div");
+let backButton = document.createElement("button");
+let resetHighScoresButton = document.createElement("button");
+
+let highScoresList = document.createElement("ol");
+
 let currentQuestion = 0;
 
 let timeRemaining = 60;
+let timerInterval;
+
+let score;
+let numScores = 0;
+let numNames = 0;
+let allScores = [];
 
 
 //Create array of objects of all questions, including their answers
@@ -65,7 +80,7 @@ let questions = [
 
 
 //Add event listener to the "view high scores" button
-// viewScoresButton.addEventListener("click", viewScores);
+viewScoresButton.addEventListener("click", viewScores);
 
 //Add event listener to start button
 startButton.addEventListener("click", startQuiz);
@@ -74,6 +89,9 @@ startButton.addEventListener("click", startQuiz);
 for (let i = 0; i < 4; i++) {
     choiceButtons[i].addEventListener("click", allowClicks);
 }
+
+//Add event listener to submit button
+initialsSubmitButton.addEventListener("click", viewScores);
 
 function allowClicks(event) {
     event.preventDefault();
@@ -99,7 +117,7 @@ function allowClicks(event) {
     for (let i = 0; i < 4; i++) {
         choiceButtons[i].removeEventListener("click", allowClicks);
     }
-    //Return event listeners
+    //Return event listeners after one second, coinciding with the beginning of the next question
     setTimeout(function() {
         for (let i = 0; i < 4; i++) {
             choiceButtons[i].addEventListener("click", allowClicks);
@@ -107,6 +125,15 @@ function allowClicks(event) {
     }, 1000);
     currentQuestion++;
     setTimeout(takeQuiz, 1000);
+}
+
+//Make function for "home" screen, to be returned to by "back" button
+function homeScreen() {
+    headerEl.textContent =  "Coding Quiz Challenge";
+    instructionsEl.textContent = "Try to answer the following code-related questions within the time limit. Incorrect answers will incur a 10 second penalty!";
+    startButton.style.display = "block";
+    scoresPageButtonsContainer.style.display = "none";
+    timerEl.textContent = timeRemaining;
 }
 
 //When start button clicked, set up displays for quiz questions and start the timer
@@ -119,8 +146,9 @@ function startQuiz() {
     takeQuiz();
 }
 
+//Function for timer
 function startTimer() {
-    let timerInterval = setInterval(function() {
+    timerInterval = setInterval(function() {
         timeRemaining--;
         timerEl.textContent = timeRemaining;
 
@@ -155,33 +183,76 @@ function takeQuiz() {
     
             choiceButtons[i].textContent = randomChoice;
             populated.push(randomChoice);
-            //Remove previously populated choice from answerChoices array
+            //Remove previously populated choice from answerChoices array to be sure each choice is populated
             let chosenIndex = answerChoices.indexOf(randomChoice);
             answerChoices.splice(chosenIndex, 1);
         }
 
     } else {
         //If all questions are answered, end the quiz
+        clearInterval(timerInterval);
         endQuiz();
     }
 
 }
 
 function endQuiz () {
+    currentQuestion = 0;
+    timeRemaining = 60;
     instructionsEl.style.display = "flex";
     choicesEl.style.display = "none";
     initialsEl.style.display = "flex";
 
     initialsSubmitButton.textContent = "Submit";
-    // initialsSubmitButton.setAttribute("style", "margin: 15px auto;")
     initialsEl.appendChild(initialsSubmitButton);
     initialsSubmitButton.addEventListener("click", submitScore);
     
-    let score = parseInt(timerEl.textContent);
+    score = parseInt(timerEl.textContent);
+
     instructionsEl.textContent = `Your final score was ${score}`;
     headerEl.textContent = "Game over";
 }
 
 function submitScore() {
-
+    allScores[numScores] = {
+        name: initialsInput.value.trim(),
+        score: score
+    };
+    numScores++;
+    localStorage.setItem(`score${numScores}`, JSON.stringify(allScores[numScores - 1]));
+    viewScores;
 }
+
+function viewScores() {
+    startButton.style.display = "none";
+    initialsEl.style.display = "none";
+    backButton.textContent = "Back";
+    resetHighScoresButton.textContent = "Reset High Scores";
+    mainContainer.appendChild(scoresPageButtonsContainer);
+    scoresPageButtonsContainer.setAttribute("style", "display: flex; align-items: center; justify-content: space-evenly; width: 500px;");
+    scoresPageButtonsContainer.appendChild(backButton);
+    scoresPageButtonsContainer.appendChild(resetHighScoresButton);
+
+
+    instructionsEl.textContent = "";
+    headerEl.textContent = "High Scores";
+
+    backButton.addEventListener("click", homeScreen);
+    resetHighScoresButton.addEventListener("click", resetHighScores);
+
+
+    quizContainerEl.appendChild(highScoresList);
+    let nextScore = document.createElement("p");
+    highScoresList.appendChild(nextScore);
+
+    let scoreItem = JSON.parse(localStorage.getItem(`score${numScores}`));
+    console.log(scoreItem);
+    nextScore.textContent = `1. ${scoreItem}`;
+}
+
+function resetHighScores() {
+    allScores = [];
+    localStorage.setItem("scores", allScores);
+}
+
+homeScreen();
