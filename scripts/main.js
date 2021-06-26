@@ -3,6 +3,7 @@ let viewScoresButton = document.querySelector("#view-high-scores");
 let startButton = document.querySelector("#start-button");
 let timerEl = document.querySelector("#timer");
 
+//Main quiz section elements
 let mainContainer = document.querySelector("main");
 let quizContainerEl = document.querySelector("#quiz-container");
 let headerEl = document.querySelector("h1");
@@ -15,32 +16,34 @@ let highScoresList = document.querySelector("#high-scores-list");
 let statusEl = document.querySelector("#answer-status-container");
 let answerStatus = document.querySelector("#answer-status");
 
+//Elements related to high scores
 let initialsEl = document.querySelector("#initials-container");
 let initialsInput = document.querySelector("#initials");
 let initialsSubmitButton = document.createElement("button");
 initialsSubmitButton.textContent = "Submit";
 initialsEl.appendChild(initialsSubmitButton);
 
+//Buttons for high scores page
 let scoresPageButtonsContainer = document.createElement("div");
 let backButton = document.createElement("button");
 let resetHighScoresButton = document.createElement("button");
 
+//To be sure the "view high scores" button can't be activated if already on the high scores page or if game is in progress
 let onHighScoresPage = false;
-
 let gameInProgress = false;
 
 let currentQuestion = 0;
-
 let timeRemaining = 60;
 let timerInterval;
 
+//Related to high scores
 let score;
 let numScores = 0;
 let allScores = [];
 let nextScore;
 
 
-//Create array of objects of all questions, including their answers
+//Create array of objects containing all questions and their answers
 let questions = [
 
     {
@@ -86,57 +89,21 @@ let questions = [
 ];
 
 
-//Add event listener to the "view high scores" button
+//Add event listeners to buttons (view high scores, start, answer choices, initials submit)
 viewScoresButton.addEventListener("click", function() {
     if (!onHighScoresPage && !gameInProgress) {
         viewScores();
     }
 });
 
-//Add event listener to start button
 startButton.addEventListener("click", startQuiz);
 
-//Add event listeners to all choice buttons
 for (let i = 0; i < 4; i++) {
-    choiceButtons[i].addEventListener("click", allowClicks);
+    choiceButtons[i].addEventListener("click", chooseAnswer);
 }
 
-//Add event listener to submit button
 initialsSubmitButton.addEventListener("click", submitScore);
 
-function allowClicks(event) {
-    event.preventDefault();
-
-    //Check if the button clicked is the correct answer, and if not, deduct points
-    if (event.target.textContent === questions[currentQuestion].correctAnswer) {
-        answerStatus.textContent = "Correct!";
-        event.target.setAttribute("style", "background-color: #59DD9B;");
-        setTimeout(function() {
-            answerStatus.textContent = "";
-            event.target.setAttribute("style", "background-color: #6E7F76;")
-        }, 1000);
-    } else {
-        timeRemaining -= 10;
-        answerStatus.textContent = "Wrong!";
-        event.target.setAttribute("style", "background-color: #FFAE8D;");
-        setTimeout(function() {
-            answerStatus.textContent = "";
-            event.target.setAttribute("style", "background-color: #6E7F76;")
-        }, 1000);        
-    }
-    //Temporarily remove event listeners for choice buttons to avoid users clicking multiple answers for the same question
-    for (let i = 0; i < 4; i++) {
-        choiceButtons[i].removeEventListener("click", allowClicks);
-    }
-    //Return event listeners after one second, coinciding with the beginning of the next question
-    setTimeout(function() {
-        for (let i = 0; i < 4; i++) {
-            choiceButtons[i].addEventListener("click", allowClicks);
-        }
-    }, 1000);
-    currentQuestion++;
-    setTimeout(takeQuiz, 1000);
-}
 
 //Make function for "home" screen, to be returned to by "back" button
 function homeScreen() {
@@ -149,7 +116,7 @@ function homeScreen() {
     timerEl.textContent = timeRemaining;
 }
 
-//When start button clicked, set up displays for quiz questions and start the timer
+//When start button clicked, set up displays for quiz questions, start the timer, and begin quiz
 function startQuiz() {
     gameInProgress = true;
     startButton.style.display = "none";
@@ -174,6 +141,42 @@ function startTimer() {
     }, 1000);
 }
 
+//For when an answer choice is clicked
+function chooseAnswer(event) {
+    event.preventDefault();
+
+    //Check if the button clicked is the correct answer, and if not, deduct time
+    if (event.target.textContent === questions[currentQuestion].correctAnswer) {
+        answerStatus.textContent = "Correct!";
+        event.target.setAttribute("style", "background-color: #59DD9B;");
+        setTimeout(function() {
+            answerStatus.textContent = "";
+            event.target.setAttribute("style", "background-color: #6E7F76;")
+        }, 1000);
+    } else {
+        timeRemaining -= 10;
+        answerStatus.textContent = "Wrong!";
+        event.target.setAttribute("style", "background-color: #FFAE8D;");
+        setTimeout(function() {
+            answerStatus.textContent = "";
+            event.target.setAttribute("style", "background-color: #6E7F76;")
+        }, 1000);        
+    }
+    //Temporarily remove event listeners for choice buttons to avoid users clicking multiple answers for the same question
+    for (let i = 0; i < 4; i++) {
+        choiceButtons[i].removeEventListener("click", chooseAnswer);
+    }
+    //Return event listeners after one second, coinciding with the beginning of the next question
+    setTimeout(function() {
+        for (let i = 0; i < 4; i++) {
+            choiceButtons[i].addEventListener("click", chooseAnswer);
+        }
+    }, 1000);
+    currentQuestion++;
+    setTimeout(takeQuiz, 1000);
+}
+
+//Show questions and answer choice buttons
 function takeQuiz() {
 
     if (currentQuestion <= 4) {
@@ -191,13 +194,12 @@ function takeQuiz() {
     
         //Randomly populate choice buttons with answer choices for increased retake value
         let  populated = [];
-    
         for (let i = 0; i < 4; i++) {
             let randomChoice = answerChoices[Math.floor(Math.random() * answerChoices.length)];
-    
             choiceButtons[i].textContent = randomChoice;
             populated.push(randomChoice);
-            //Remove previously populated choice from answerChoices array to be sure each choice is populated
+
+            //Remove previously populated choice from answerChoices array to be sure each choice is populated and none are populated twice
             let chosenIndex = answerChoices.indexOf(randomChoice);
             answerChoices.splice(chosenIndex, 1);
         }
@@ -210,6 +212,7 @@ function takeQuiz() {
 
 }
 
+//For when all questions are answered or timer has run out
 function endQuiz () {
     gameInProgress = false;
     currentQuestion = 0;
@@ -221,13 +224,22 @@ function endQuiz () {
     score = parseInt(timerEl.textContent);
 
     headerEl.textContent = "Game over";
-    instructionsEl.textContent = `Your final score was ${score}`;
+
+    //In case user gets last question wrong with less than 10 seconds remaining, give "0" as lowest possible score
+    if (score < 0) {
+        score = 0;
+        timerEl.textContent = score;
+        instructionsEl.textContent = `Your final score was ${score}`;
+    } else {
+        instructionsEl.textContent = `Your final score was ${score}`;
+    }
 }
 
+//Enter initials and high score, and set this info to local storage
 function submitScore() {
     allScores[numScores] = {
         name: initialsInput.value.trim(),
-        score: score.toString()
+        score: score
     };
     let newScore = allScores[numScores];
     numScores++;
@@ -237,28 +249,30 @@ function submitScore() {
 
     //Sort all scores in descending order by score, for better display of high scores on high scores page
     allScores.sort((a, b) => a.score < b.score ? 1 : -1);
-    console.log(allScores);
 
     nextScore = document.createElement("li");
     highScoresList.appendChild(nextScore);
     viewScores();
 }
 
+//Show high scores page
 function viewScores() {
     onHighScoresPage = true;
     startButton.style.display = "none";
     initialsEl.style.display = "none";
     backButton.textContent = "Back";
     resetHighScoresButton.textContent = "Reset High Scores";
+
+    //Add back and reset buttons to page
     mainContainer.appendChild(scoresPageButtonsContainer);
     scoresPageButtonsContainer.setAttribute("style", "display: flex; align-items: center; justify-content: space-evenly; width: 500px;");
     scoresPageButtonsContainer.appendChild(backButton);
     scoresPageButtonsContainer.appendChild(resetHighScoresButton);
 
-
     instructionsEl.textContent = "";
     headerEl.textContent = "High Scores";
 
+    //Add event listeners for back and reset buttons
     backButton.addEventListener("click", homeScreen);
     resetHighScoresButton.addEventListener("click", resetHighScores);
 
@@ -270,16 +284,16 @@ function viewScores() {
         allListItems[i].textContent = `${allScores[i].name} - ${allScores[i].score}`;
     }
 
-    //Bold top score
+    //Bold highest score
     allListItems[0].setAttribute("style", "font-weight: bold;");
 }
 
+//Remove all high scores from local storage and allScores array
 function resetHighScores() {
     allScores = [];
     localStorage.clear();
+    numScores = 0;
 
     //Remove all list item children from high scores list
     highScoresList.innerHTML = "";
 }
-
-homeScreen();
