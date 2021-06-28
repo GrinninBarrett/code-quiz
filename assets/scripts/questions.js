@@ -1,3 +1,6 @@
+// This is in a separate file to better allow for future expansion of the quiz without taking up too much space in main.js
+
+
 //Create array of objects containing all questions and their answers
 let questions = [
 
