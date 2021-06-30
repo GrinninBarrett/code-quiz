@@ -13,7 +13,7 @@ let questions = [
     },
 
     {
-        question: "Inside which HTML element do we link the JavaScript?",
+        question: "Inside which HTML element do we link a JavaScript file?",
         correctAnswer: "<script>",
         wrongOne: "<javascript>",
         wrongTwo: "<scripting>",
