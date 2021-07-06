@@ -22,7 +22,7 @@ let initialsInput = document.querySelector("#initials");
 let initialsSubmitButton = document.querySelector("#initials-submit-button");
 
 //Buttons for high scores page
-let scoresPageButtonsContainer = document.querySelector("#high-scores-buttons");
+let highScoresPageButtons = document.querySelector("#high-scores-buttons");
 let backButton = document.querySelector("#back");
 let resetHighScoresButton = document.querySelector("#reset");
 
@@ -34,10 +34,12 @@ let currentQuestion = 0;
 let timeRemaining = 60;
 let timerInterval;
 
-//Related to high scores
+
+//Retrieve numScores and allScores from local storage if present, set to 0 and [] if not
+let numScores = localStorage.getItem("numScores" || 0);
+let allScores = JSON.parse(localStorage.getItem("allScores") || "[]");
+
 let score;
-let numScores = 0;
-let allScores = [];
 let nextScore;
 
 
@@ -54,7 +56,7 @@ for (let i = 0; i < 4; i++) {
     choiceButtons[i].addEventListener("click", chooseAnswer);
 }
 
-initialsSubmitButton.addEventListener("click", submitScore);
+initialsEl.addEventListener("submit", submitScore);
 
 backButton.addEventListener("click", homeScreen);
 resetHighScoresButton.addEventListener("click", resetHighScores);
@@ -68,8 +70,10 @@ function homeScreen(event) {
     headerEl.textContent =  "Coding Quiz Challenge";
     instructionsEl.textContent = "Try to answer the following code-related questions within the time limit. Incorrect answers will incur a 10 second penalty!";
     startButton.style.display = "block";
-    scoresPageButtonsContainer.style.display = "none";
+    highScoresPageButtons.style.display = "none";
     highScoresList.style.display = "none";
+    //Remove all high scores list elements, which will be added back upon calling viewScores
+    highScoresList.innerHTML = "";
     timerEl.textContent = timeRemaining;
 }
 
@@ -91,7 +95,7 @@ function startTimer() {
     timerInterval = setInterval(function() {
         timeRemaining--;
         timerEl.textContent = timeRemaining;
-        
+
         //If timer reaches 0, end quiz
         if (timeRemaining === 0) {
             clearInterval(timerInterval);
@@ -190,41 +194,54 @@ function endQuiz () {
 }
 
 //Enter initials and high score, and set this info to local storage
-function submitScore() {
-    allScores[numScores] = {
-        name: initialsInput.value.trim(),
-        score: score
-    };
-    let newScore = allScores[numScores];
-    numScores++;
+function submitScore(event) {
+    //Check if input contains actual characters, alerting if not and proceeding if so
+    if (initialsInput.value.trim().length === 0) {
+        alert("Please enter your initials!");
+    } else {
+        allScores[numScores] = {
+            name: initialsInput.value.trim(),
+            score: score
+        };
+        let newScore = allScores[numScores];
+        numScores++;
+        
+        //Set local storage item with most recent score
+        localStorage.setItem(`score${numScores}`, JSON.stringify(newScore));
+        localStorage.setItem("numScores", numScores);
     
-    //Set local storage item with most recent score
-    localStorage.setItem(`score${numScores}`, JSON.stringify(newScore));
+        //Sort all scores in descending order by score, for better display of high scores on high scores page
+        allScores.sort((a, b) => a.score < b.score ? 1 : -1);
+        localStorage.setItem("allScores", JSON.stringify(allScores));
+    
+        viewScores();
+    
+    }
 
-    //Sort all scores in descending order by score, for better display of high scores on high scores page
-    allScores.sort((a, b) => a.score < b.score ? 1 : -1);
+    event.preventDefault();
 
-    nextScore = document.createElement("li");
-    highScoresList.appendChild(nextScore);
-    viewScores();
 }
 
 //Show high scores page
 function viewScores() {
+
     onHighScoresPage = true;
     startButton.style.display = "none";
     initialsEl.style.display = "none";
-    backButton.textContent = "Back";
-    resetHighScoresButton.textContent = "Reset High Scores";
 
     //Show back and reset buttons
-    mainContainer.appendChild(scoresPageButtonsContainer);
-    scoresPageButtonsContainer.style.display = "flex";
+    highScoresPageButtons.style.display = "flex";
 
     instructionsEl.textContent = "";
     headerEl.textContent = "High Scores";
 
     highScoresList.setAttribute("style", "display: flex; flex-direction: column;");
+
+    //Add list elements in this function to be sure they appear even after page reload
+    for (let i = 0; i < numScores; i++) {
+        nextScore = document.createElement("li");
+        highScoresList.appendChild(nextScore);
+    }
 
     //Set text content for each list item according to high score list
     let allListItems = document.querySelectorAll("li");
