@@ -19,14 +19,12 @@ let answerStatus = document.querySelector("#answer-status");
 //Elements related to high scores
 let initialsEl = document.querySelector("#initials-container");
 let initialsInput = document.querySelector("#initials");
-let initialsSubmitButton = document.createElement("button");
-initialsSubmitButton.textContent = "Submit";
-initialsEl.appendChild(initialsSubmitButton);
+let initialsSubmitButton = document.querySelector("#initials-submit-button");
 
 //Buttons for high scores page
-let scoresPageButtonsContainer = document.createElement("div");
-let backButton = document.createElement("button");
-let resetHighScoresButton = document.createElement("button");
+let scoresPageButtonsContainer = document.querySelector("#high-scores-buttons");
+let backButton = document.querySelector("#back");
+let resetHighScoresButton = document.querySelector("#reset");
 
 //To be sure the "view high scores" button can't be activated if already on the high scores page or if game is in progress
 let onHighScoresPage = false;
@@ -43,7 +41,7 @@ let allScores = [];
 let nextScore;
 
 
-//Add event listeners to buttons (view high scores, start, answer choices, initials submit)
+//Add event listeners to buttons (view high scores, start, answer choices, initials submit, back, and reset)
 viewScoresButton.addEventListener("click", function() {
     if (!onHighScoresPage && !gameInProgress) {
         viewScores();
@@ -58,9 +56,14 @@ for (let i = 0; i < 4; i++) {
 
 initialsSubmitButton.addEventListener("click", submitScore);
 
+backButton.addEventListener("click", homeScreen);
+resetHighScoresButton.addEventListener("click", resetHighScores);
+
 
 //Make function for "home" screen, to be returned to by "back" button
-function homeScreen() {
+function homeScreen(event) {
+    event.preventDefault();
+
     onHighScoresPage = false;
     headerEl.textContent =  "Coding Quiz Challenge";
     instructionsEl.textContent = "Try to answer the following code-related questions within the time limit. Incorrect answers will incur a 10 second penalty!";
@@ -71,7 +74,9 @@ function homeScreen() {
 }
 
 //When start button clicked, set up displays for quiz questions, start the timer, and begin quiz
-function startQuiz() {
+function startQuiz(event) {
+    event.preventDefault();
+
     gameInProgress = true;
     startButton.style.display = "none";
     instructionsEl.style.display = "none";
@@ -86,7 +91,7 @@ function startTimer() {
     timerInterval = setInterval(function() {
         timeRemaining--;
         timerEl.textContent = timeRemaining;
-
+        
         //If timer reaches 0, end quiz
         if (timeRemaining === 0) {
             clearInterval(timerInterval);
@@ -95,40 +100,6 @@ function startTimer() {
     }, 1000);
 }
 
-//For when an answer choice is clicked
-function chooseAnswer(event) {
-    event.preventDefault();
-
-    //Check if the button clicked is the correct answer, and if not, deduct time
-    if (event.target.textContent === questions[currentQuestion].correctAnswer) {
-        answerStatus.textContent = "Correct!";
-        event.target.setAttribute("style", "background-color: #59DD9B;");
-        setTimeout(function() {
-            answerStatus.textContent = "";
-            event.target.setAttribute("style", "background-color: #6E7F76;")
-        }, 1000);
-    } else {
-        timeRemaining -= 10;
-        answerStatus.textContent = "Wrong!";
-        event.target.setAttribute("style", "background-color: #FFAE8D;");
-        setTimeout(function() {
-            answerStatus.textContent = "";
-            event.target.setAttribute("style", "background-color: #6E7F76;")
-        }, 1000);        
-    }
-    //Temporarily remove event listeners for choice buttons to avoid users clicking multiple answers for the same question
-    for (let i = 0; i < 4; i++) {
-        choiceButtons[i].removeEventListener("click", chooseAnswer);
-    }
-    //Return event listeners after one second, coinciding with the beginning of the next question
-    setTimeout(function() {
-        for (let i = 0; i < 4; i++) {
-            choiceButtons[i].addEventListener("click", chooseAnswer);
-        }
-    }, 1000);
-    currentQuestion++;
-    setTimeout(takeQuiz, 1000);
-}
 
 //Show questions and answer choice buttons
 function takeQuiz() {
@@ -166,6 +137,42 @@ function takeQuiz() {
 
 }
 
+//For when an answer choice is clicked
+function chooseAnswer(event) {
+    event.preventDefault();
+
+    //Check if the button clicked is the correct answer, and if not, deduct time
+    if (event.target.textContent === questions[currentQuestion].correctAnswer) {
+        answerStatus.textContent = "Correct!";
+        event.target.setAttribute("style", "background-color: #59DD9B;");
+        setTimeout(function() {
+            answerStatus.textContent = "";
+            event.target.setAttribute("style", "background-color: #6E7F76;")
+        }, 1000);
+    } else {
+        timeRemaining -= 10;
+        answerStatus.textContent = "Wrong!";
+        event.target.setAttribute("style", "background-color: #FFAE8D;");
+        setTimeout(function() {
+            answerStatus.textContent = "";
+            event.target.setAttribute("style", "background-color: #6E7F76;")
+        }, 1000);
+    }
+
+    //Temporarily remove event listeners for choice buttons to avoid users clicking multiple answers for the same question
+    for (let i = 0; i < 4; i++) {
+        choiceButtons[i].removeEventListener("click", chooseAnswer);
+    }
+    //Return event listeners after one second, coinciding with the beginning of the next question
+    setTimeout(function() {
+        for (let i = 0; i < 4; i++) {
+            choiceButtons[i].addEventListener("click", chooseAnswer);
+        }
+    }, 1000);
+    currentQuestion++;
+    setTimeout(takeQuiz, 1000);
+}
+
 //For when all questions are answered or timer has run out
 function endQuiz () {
     gameInProgress = false;
@@ -179,14 +186,7 @@ function endQuiz () {
 
     headerEl.textContent = "Game over";
 
-    //In case user gets last question wrong with less than 10 seconds remaining, give "0" as lowest possible score
-    if (score < 0) {
-        score = 0;
-        timerEl.textContent = score;
-        instructionsEl.textContent = `Your final score was ${score}`;
-    } else {
-        instructionsEl.textContent = `Your final score was ${score}`;
-    }
+    instructionsEl.textContent = `Your final score was ${score}`;
 }
 
 //Enter initials and high score, and set this info to local storage
@@ -217,25 +217,19 @@ function viewScores() {
     backButton.textContent = "Back";
     resetHighScoresButton.textContent = "Reset High Scores";
 
-    //Add back and reset buttons to page
+    //Show back and reset buttons
     mainContainer.appendChild(scoresPageButtonsContainer);
-    scoresPageButtonsContainer.setAttribute("style", "display: flex; align-items: center; justify-content: space-evenly; width: 500px;");
-    scoresPageButtonsContainer.appendChild(backButton);
-    scoresPageButtonsContainer.appendChild(resetHighScoresButton);
+    scoresPageButtonsContainer.style.display = "flex";
 
     instructionsEl.textContent = "";
     headerEl.textContent = "High Scores";
-
-    //Add event listeners for back and reset buttons
-    backButton.addEventListener("click", homeScreen);
-    resetHighScoresButton.addEventListener("click", resetHighScores);
 
     highScoresList.setAttribute("style", "display: flex; flex-direction: column;");
 
     //Set text content for each list item according to high score list
     let allListItems = document.querySelectorAll("li");
     for (let i = 0; i < allListItems.length; i++) {
-        allListItems[i].textContent = `${allScores[i].name} - ${allScores[i].score}`;
+        allListItems[i].textContent = `${allScores[i].name}: ${allScores[i].score}`;
     }
 
     //Bold highest score

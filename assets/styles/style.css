@@ -94,7 +94,8 @@ li:nth-child(odd) {
 }
 
 #high-scores-buttons {
-    display: flex;
+    display: none;
+    align-items: center;
+    justify-content: space-evenly;
     width: 500px;
-
 }
