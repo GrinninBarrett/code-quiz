@@ -68,6 +68,7 @@ li:nth-child(odd) {
 /* Hide this ol element on page load for correct formatting */
 #high-scores-list {
     display: none;
+    flex-direction: column;
 }
 
 #start-button {

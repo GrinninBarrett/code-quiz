@@ -235,7 +235,7 @@ function viewScores() {
     instructionsEl.textContent = "";
     headerEl.textContent = "High Scores";
 
-    highScoresList.setAttribute("style", "display: flex; flex-direction: column;");
+    highScoresList.style.display = "flex";
 
     if (numScores !== 0) {
         //Add list elements in this function to be sure they appear from view high scores button even after page reload
