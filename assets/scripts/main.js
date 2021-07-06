@@ -198,6 +198,7 @@ function submitScore(event) {
     //Check if input contains actual characters, alerting if not and proceeding if so
     if (initialsInput.value.trim().length === 0) {
         alert("Please enter your initials!");
+        event.preventDefault();
     } else {
         allScores[numScores] = {
             name: initialsInput.value.trim(),
@@ -213,12 +214,12 @@ function submitScore(event) {
         //Sort all scores in descending order by score, for better display of high scores on high scores page
         allScores.sort((a, b) => a.score < b.score ? 1 : -1);
         localStorage.setItem("allScores", JSON.stringify(allScores));
+
+        event.preventDefault();
     
         viewScores();
     
     }
-
-    event.preventDefault();
 
 }
 
