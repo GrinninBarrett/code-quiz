@@ -8,7 +8,7 @@ I hope to learn more about improving this application's code organization and ef
 
 
 ## Screenshot of completed application:
-![Screenshot of Tucker's completed Code Quiz](images/finished-code-quiz.png "Tucker's completed Code Quiz")
+![Screenshot of Tucker's completed Code Quiz](assets/images/finished-code-quiz.png "Tucker's completed Code Quiz")
 
 ## Link to deployed application:
 [Tucker Barrett's Code Quiz](http://grinninbarrett.github.io/code-quiz "Tucker's deployed Code Quiz application")
