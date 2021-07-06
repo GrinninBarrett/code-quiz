@@ -38,10 +38,10 @@ let questions = [
 
     {
         question: `Which of these is a correct way to declare a function?`,
-        correctAnswer: `function funkyTown() {};`,
-        wrongOne: `let funkyTown = [];`,
-        wrongTwo: `var funkyTown = function {};`,
-        wrongThree: `function.funkyTown = () {}`,
+        correctAnswer: `function myFunc() {};`,
+        wrongOne: `let myFunc = [];`,
+        wrongTwo: `var myFunc = function {};`,
+        wrongThree: `function.myFunc = () {}`,
     }
 
 ];

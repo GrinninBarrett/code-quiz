@@ -36,7 +36,7 @@ let timerInterval;
 
 
 //Retrieve numScores and allScores from local storage if present, set to 0 and [] if not
-let numScores = localStorage.getItem("numScores" || 0);
+let numScores = localStorage.getItem("numScores") || 0;
 let allScores = JSON.parse(localStorage.getItem("allScores") || "[]");
 
 let score;
@@ -56,7 +56,7 @@ for (let i = 0; i < 4; i++) {
     choiceButtons[i].addEventListener("click", chooseAnswer);
 }
 
-initialsEl.addEventListener("submit", submitScore);
+initialsSubmitButton.addEventListener("click", submitScore);
 
 backButton.addEventListener("click", homeScreen);
 resetHighScoresButton.addEventListener("click", resetHighScores);
@@ -197,8 +197,8 @@ function endQuiz () {
 function submitScore(event) {
     //Check if input contains actual characters, alerting if not and proceeding if so
     if (initialsInput.value.trim().length === 0) {
-        alert("Please enter your initials!");
         event.preventDefault();
+        alert("Please enter your initials!");
     } else {
         allScores[numScores] = {
             name: initialsInput.value.trim(),
@@ -220,7 +220,6 @@ function submitScore(event) {
         viewScores();
     
     }
-
 }
 
 //Show high scores page
@@ -238,20 +237,23 @@ function viewScores() {
 
     highScoresList.setAttribute("style", "display: flex; flex-direction: column;");
 
-    //Add list elements in this function to be sure they appear even after page reload
-    for (let i = 0; i < numScores; i++) {
-        nextScore = document.createElement("li");
-        highScoresList.appendChild(nextScore);
+    if (numScores !== 0) {
+        //Add list elements in this function to be sure they appear from view high scores button even after page reload
+        for (let i = 0; i < numScores; i++) {
+            nextScore = document.createElement("li");
+            highScoresList.appendChild(nextScore);
+        }
+
+        //Set text content for each list item according to high score list
+        let allListItems = document.querySelectorAll("li");
+        for (let i = 0; i < allListItems.length; i++) {
+            allListItems[i].textContent = `${allScores[i].name}: ${allScores[i].score}`;
+        }
+
+        //Bold highest score
+        allListItems[0].setAttribute("style", "font-weight: bold;");
     }
 
-    //Set text content for each list item according to high score list
-    let allListItems = document.querySelectorAll("li");
-    for (let i = 0; i < allListItems.length; i++) {
-        allListItems[i].textContent = `${allScores[i].name}: ${allScores[i].score}`;
-    }
-
-    //Bold highest score
-    allListItems[0].setAttribute("style", "font-weight: bold;");
 }
 
 //Remove all high scores from local storage and allScores array
