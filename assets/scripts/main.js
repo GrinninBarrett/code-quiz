@@ -206,6 +206,7 @@ function submitScore(event) {
         };
         let newScore = allScores[numScores];
         numScores++;
+        initialsInput.value = "";
         
         //Set local storage item with most recent score
         localStorage.setItem(`score${numScores}`, JSON.stringify(newScore));
